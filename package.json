@@ -1,0 +1,57 @@
+{
+  "name": "pi-pipeline",
+  "version": "0.1.1",
+  "description": "Pi extension for spec-driven development \u2014 intent clarification, plan mode, verification gates, two-stage review, adaptive behavior, and anti-rationalization enforcement",
+  "author": "baphuongna",
+  "license": "MIT",
+  "type": "module",
+  "keywords": [
+    "pi-package",
+    "pi",
+    "pi-coding-agent",
+    "pipeline",
+    "planning",
+    "verification",
+    "review",
+    "spec-driven"
+  ],
+  "files": [
+    "*.ts",
+    "src/**/*.ts",
+    "README.md",
+    "tsconfig.json"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test --test-concurrency=1 --test-timeout=30000 test/unit/*.test.ts"
+  },
+  "exports": {},
+  "pi": {
+    "extensions": [
+      "./index.ts"
+    ]
+  },
+  "peerDependencies": {
+    "@mariozechner/pi-agent-core": "*",
+    "@mariozechner/pi-ai": "*",
+    "@mariozechner/pi-coding-agent": "*"
+  },
+  "dependencies": {
+    "typebox": "^1.1.24"
+  },
+  "devDependencies": {
+    "@mariozechner/pi-coding-agent": "^0.65.0",
+    "typescript": "^5.9.3"
+  },
+  "peerDependenciesMeta": {
+    "@mariozechner/pi-agent-core": {
+      "optional": true
+    },
+    "@mariozechner/pi-ai": {
+      "optional": true
+    },
+    "@mariozechner/pi-coding-agent": {
+      "optional": true
+    }
+  }
+}

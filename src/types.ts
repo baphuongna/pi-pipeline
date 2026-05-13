@@ -155,3 +155,6 @@ export function emptyPipelineState(): PipelineState {
 		currentTaskIndex: 0,
 	};
 }
+
+// Work Items exports
+export type { WorkItem, WorkItemFilter } from './track/work-items.js';

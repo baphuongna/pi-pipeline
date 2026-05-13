@@ -19,3 +19,6 @@ export { createDependencyGraph, type DependencyNode, type DependencyGraph } from
 
 // Spec-driven workflow exports
 export { createSpecWorkflow, type SpecDocument, type Task, type SpecWorkflow } from './spec/spec-workflow.js';
+
+// Event pipeline exports
+export { createEventPipeline, type EventHandler, type EventPipeline } from './event/event-pipeline.js';

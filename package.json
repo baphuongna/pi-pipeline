@@ -1,6 +1,6 @@
 {
   "name": "pi-pipeline",
-  "version": "0.4.6",
+  "version": "0.4.7",
   "description": "Extension for Pi coding agent",
   "type": "module",
   "main": "./index.ts",

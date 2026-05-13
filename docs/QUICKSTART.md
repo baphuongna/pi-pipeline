@@ -3,7 +3,7 @@
 ## Installation
 
 ```bash
-npm install pi-pipeline
+pi install npm:pi-pipeline
 ```
 
 ## Basic Usage

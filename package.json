@@ -1,6 +1,6 @@
 {
   "name": "@baphuongna/pi-pipeline",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Pi extension for spec-driven development — intent clarification, plan mode, verification gates, two-stage review, adaptive behavior, and anti-rationalization enforcement",
   "type": "module",
   "main": "./dist/index.js",

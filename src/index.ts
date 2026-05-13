@@ -13,3 +13,6 @@ export { createSkillRegistry, type SkillDocument, type NewSkill, type SkillSearc
 
 // Session planning exports
 export { createSessionPlanner, type SessionPlan, type Milestone } from './plan/session-plan.js';
+
+// Dependency graph exports
+export { createDependencyGraph, type DependencyNode, type DependencyGraph } from './graph/dependency-graph.js';

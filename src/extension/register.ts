@@ -158,7 +158,17 @@ function registerPipelineCommands(
 					cwd: ctx.cwd,
 				};
 				const result = handleVerify(state(), taskCtx, config);
+				set(result.state);
 				cmdCtx.ui.notify(result.message);
+
+				// Emit verify:passed event when all gates pass
+				if (result.allPassed) {
+					pi.events.emit("verify:passed", {
+						timestamp: new Date().toISOString(),
+						cwd: ctx.cwd,
+						gates: result.results?.map((r) => r.gateId) ?? [],
+					});
+				}
 			}
 		},
 	});

@@ -9,6 +9,7 @@ export interface VerifyCommandResult {
 	message: string;
 	state: PipelineState;
 	results?: GateResult[];
+	allPassed?: boolean;
 }
 
 /**
@@ -51,6 +52,7 @@ export function handleVerify(
 		message: passed ? `All gates passed!\n${summary}` : `Some gates failed:\n${summary}`,
 		state,
 		results,
+		allPassed: passed,
 	};
 }
 

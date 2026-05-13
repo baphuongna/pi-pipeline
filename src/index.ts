@@ -10,3 +10,6 @@ export { createWorkItemTracker, type WorkItem, type WorkItemFilter } from './tra
 
 // Skill registry exports
 export { createSkillRegistry, type SkillDocument, type NewSkill, type SkillSearchResult } from './skill/skill-registry.js';
+
+// Session planning exports
+export { createSessionPlanner, type SessionPlan, type Milestone } from './plan/session-plan.js';

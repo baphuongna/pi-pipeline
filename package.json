@@ -1,58 +1,41 @@
 {
   "name": "pi-pipeline",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Pi extension for spec-driven development — intent clarification, plan mode, verification gates, two-stage review, adaptive behavior, and anti-rationalization enforcement",
-  "author": "baphuongna",
-  "license": "MIT",
   "type": "module",
-  "keywords": [
-    "pi-package",
-    "pi",
-    "pi-coding-agent",
-    "pipeline",
-    "planning",
-    "verification",
-    "review",
-    "spec-driven"
-  ],
-  "files": [
-    "*.ts",
-    "src/**/*.ts",
-    "README.md",
-    "tsconfig.json"
-  ],
-  "scripts": {
-    "typecheck": "tsc --noEmit",
-    "test": "npx tsx --test --test --test-concurrency=1 --test-timeout=30000 test/unit/*.test.ts"
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
   },
-  "exports": {},
+  "scripts": {
+    "build": "tsc --noEmitOnError false",
+    "typecheck": "tsc --noEmit",
+    "test": "npx tsx --test --test-concurrency=1 --test-timeout=30000 test/unit/*.test.ts"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "pi",
+    "coding-agent",
+    "extension"
+  ],
+  "author": "BaphuongNA",
+  "license": "MIT",
   "pi": {
     "extensions": [
       "./index.ts"
     ]
   },
   "peerDependencies": {
-    "@mariozechner/pi-agent-core": "*",
-    "@mariozechner/pi-ai": "*",
-    "@mariozechner/pi-coding-agent": "*"
-  },
-  "dependencies": {
-    "typebox": "^1.1.24"
+    "typescript": "^5.0.0"
   },
   "devDependencies": {
-    "@mariozechner/pi-coding-agent": "^0.65.0",
-    "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
-  },
-  "peerDependenciesMeta": {
-    "@mariozechner/pi-agent-core": {
-      "optional": true
-    },
-    "@mariozechner/pi-ai": {
-      "optional": true
-    },
-    "@mariozechner/pi-coding-agent": {
-      "optional": true
-    }
+    "tsx": "^4.19.0"
   }
 }

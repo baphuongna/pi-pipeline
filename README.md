@@ -21,7 +21,7 @@ Pipeline orchestration extension for Pi coding agents.
 pi install npm:pi-pipeline
 ```
 
-## Usage
+## Quick Start
 
 ### Start Plan Mode
 ```bash
@@ -47,10 +47,12 @@ pi install npm:pi-pipeline
 
 ## Commands
 
-- `/plan` - Start plan mode
-- `/verify` - Verify completion
-- `/clarify` - Clarify requirements
-- `/work` - Work item management
+| Command | Description |
+|---------|-------------|
+| `/plan` | Start plan mode |
+| `/verify` | Verify completion |
+| `/clarify` | Clarify requirements |
+| `/work` | Work item management |
 
 ## Verify
 

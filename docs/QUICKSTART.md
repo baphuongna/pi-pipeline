@@ -8,86 +8,109 @@ pi install npm:pi-pipeline
 
 ## Basic Usage
 
-### Create Plan
+### 1. Start Plan Mode
 
 ```bash
 /plan Implement user authentication
+
+Output:
+## Plan Mode: User Authentication
+
+### Requirements
+- User registration with email
+- Login with email/password
+- JWT token generation
+- Logout functionality
+
+### Tasks
+1. [ ] Design database schema
+2. [ ] Create User model
+3. [ ] Implement registration API
+4. [ ] Implement login API
+5. [ ] Add JWT middleware
+6. [ ] Write tests
+
+### Verification Gates
+- [ ] All tests pass
+- [ ] Security review passed
+- [ ] Code quality checks pass
 ```
 
-### Ship Feature
+### 2. Add Work Items
 
 ```bash
-/ship
+/work add "Implement registration API"
+/work add "Implement login API"
+/work list
 ```
 
-### Run Quality Gates
+### 3. Complete Tasks
 
 ```bash
-/gates
+/work done "Implement registration API"
+/work status
 ```
 
-### Show Metrics
+### 4. Verify
 
 ```bash
-/metrics
+/verify
+
+Output:
+## Verification Results
+
+### Quality Gates
+✅ All tests pass
+✅ Lint checks pass
+✅ Type checks pass
+⚠️ Security review - 2 warnings
+
+### Summary
+Status: PARTIAL
+Issues: 2 medium severity
 ```
 
-## SDLC Router
+## Examples
 
-```typescript
-import { routeSDLC } from 'pi-pipeline';
+### Example: Clarify Requirements
 
-// Route to appropriate workflow
-const path = routeSDLC({
-  hasBAInput: true,
-  complexity: 'high',
-  urgency: 'low',
-  hasAmbiguity: false,
-  requiresConsensus: false,
-});
+```
+/clarify
 
-console.log(path.path);    // 'a' | 'b' | 'c'
-console.log(path.steps);   // Implementation steps
+Output:
+## Intent Clarification
+
+I have some questions:
+
+1. **Authentication Method**
+   - Should we use JWT or session-based auth?
+   - Token expiry duration?
+
+2. **Password Requirements**
+   - Minimum length?
+   - Require special characters?
+
+3. **Registration Flow**
+   - Email verification required?
+   - Welcome email?
 ```
 
-## Architecture Decisions
+### Example: Session Planning
 
-```typescript
-import { createDecisionRegistry, createADR } from 'pi-pipeline';
-
-const registry = createDecisionRegistry();
-
-registry.add(createADR({
-  id: 'ADR-001',
-  title: 'Use Graph Memory',
-  deciders: ['Team Lead'],
-  context: 'Need better context',
-  decision: 'Use hash-based graph',
-}));
-
-// List all ADRs
-registry.list();
 ```
+/plan Sprint 2 features
 
-## Boil the Lake
+Output:
+## Session Plan
 
-```typescript
-import { shouldComplete } from 'pi-pipeline';
+### Session 1
+- Task A (estimated: 30min)
+- Task B (estimated: 1h)
 
-// Decide: complete approach vs shortcut?
-const result = shouldComplete(
-  95,   // coverage A
-  150,  // lines A
-  80,   // coverage B
-  50    // lines B
-);
+### Session 2
+- Task C (estimated: 45min)
+- Task D (estimated: 2h)
 
-if (result.complete) {
-  console.log('Do the complete thing!');
-}
+### Context for Next Session
+Resume from: Task C
 ```
-
-## Next Steps
-
-- Read [API.md](API.md) for full API reference
-- Check [SPEC.md](../SPEC.md) for feature details

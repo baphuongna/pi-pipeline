@@ -16,3 +16,6 @@ export { createSessionPlanner, type SessionPlan, type Milestone } from './plan/s
 
 // Dependency graph exports
 export { createDependencyGraph, type DependencyNode, type DependencyGraph } from './graph/dependency-graph.js';
+
+// Spec-driven workflow exports
+export { createSpecWorkflow, type SpecDocument, type Task, type SpecWorkflow } from './spec/spec-workflow.js';

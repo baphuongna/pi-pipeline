@@ -182,3 +182,52 @@ memory_search({
   maxResults: 3
 })
 ```
+
+## Cross-Extension Integration
+
+### With pi-render (Visual Feedback)
+
+```typescript
+// Show pipeline plan
+visual_update_plan({
+  title: "Build Pipeline",
+  status: "READY",
+  tasks: [
+    { id: "1", description: "Lint", status: "pending" },
+    { id: "2", description: "Test", status: "pending" },
+    { id: "3", description: "Build", status: "pending" }
+  ]
+})
+
+// Update progress
+visual_update_progress({ phase: "test", completed: 2, total: 5 })
+
+// Show results
+visual_show_findings({ findings: [...] })
+```
+
+### With pi-audit (Security Gate)
+
+```typescript
+// Run pipeline with security gate
+pipeline_verify({
+  testCommand: "npm test",
+  gates: ["security-audit"]
+})
+
+// If security issues found, pipeline blocks
+review_report({ format: "markdown" })
+```
+
+### With pi-smart (Optimize Context)
+
+```typescript
+// Analyze complexity first
+analyze({ files: "src/**/*.ts", intent: "complexity" })
+
+// Optimize context
+smart_config({ action: "set", key: "focus", value: "complex-files" })
+
+// Run pipeline with optimized context
+pipeline_verify()
+```

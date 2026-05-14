@@ -2,32 +2,34 @@
 
 ## Extension Purpose
 
-pi-pipeline provides task orchestration, milestone tracking, and quality gates for Pi coding agents.
+pi-pipeline provides spec-driven development, milestone tracking, and quality gates for Pi coding agents.
 
 ## Source Of Truth
 
 1. `README.md` - Extension overview
-2. `docs/HARNESS.md` - Operating model
-3. `docs/FEATURE_INTAKE.md` - Intake process
-4. `docs/product/` - Product contracts
-5. `docs/stories/` - Story packets
-6. `docs/TEST_MATRIX.md` - Proof status
-7. `docs/decisions/` - Decision records
+2. `skills/spec-driven/SKILL.md` - Pipeline skill
+3. `docs/HARNESS.md` - Operating model
+4. `docs/FEATURE_INTAKE.md` - Intake process
+5. `docs/product/` - Product contracts
+6. `docs/stories/` - Story packets
+7. `docs/TEST_MATRIX.md` - Proof status
+8. `docs/decisions/` - Decision records
 
 ## Extension Capabilities
 
 ### Core Tools
 - `pipeline_status` - Get pipeline state
 - `pipeline_verify` - Run verification gates
-- `pipeline_progress` - Track progress
-- `visual_update_plan` - Update plan display
-- `visual_update_progress` - Update progress display
 
-### Commands
-- `/plan` - Create implementation plan
-- `/go` - Execute plan
-- `/clarify` - Clarify requirements
-- `/verify` - Run verification
+### Skills
+- `skills/spec-driven/SKILL.md` - Milestones, quality gates, work items
+
+## When to Use This Extension
+
+- Spec-driven development
+- Milestone tracking
+- Quality gate verification
+- Work item management
 
 ## Validation Commands
 

@@ -1,197 +1,156 @@
 ---
 name: spec-driven
-description: Spec-driven development with milestones, cost tracking, and quality gates
+description: Spec-driven development with milestones, quality gates, cost tracking, and work item management
 triggers:
   - spec-driven
   - milestone
   - pipeline
   - ship
   - deploy
+  - quality gate
+  - verification
+  - work item
+  - track progress
+  - cost tracking
 requirements:
-  tools: [read, write, bash]
-  context: [project structure, current branch]
+  tools: [pipeline_status, pipeline_verify, read, bash]
+  context: [spec files, codebase]
 ---
 
-# Spec-Driven Pipeline Skill
+# Spec-Driven Skill
 
 ## Objective
-Execute spec-driven development with milestone tracking, cost monitoring, and automated quality gates.
+Track development progress through spec-driven milestones, run verification gates, and manage work items through the pipeline.
+
+## Tools Available
+- `pipeline_status` - Get the current pipeline state including plan mode, task progress, and complexity level
+- `pipeline_verify` - Run verification gates for the current task
 
 ## When to Use
-- When starting a new feature from SPEC.md
-- When tracking progress through development phases
-- When deploying with quality gates and canary monitoring
-- When managing pipeline budgets
+- When working on spec-driven development
+- When tracking milestones and deliverables
+- When running quality gates before commits
+- When managing work items through the pipeline
+- When checking verification status
 
-## Workflow
+## Tool Usage
 
-### Step 1: Create Milestone from Spec
-```typescript
-import { SpecMilestone, parseSpec } from '../../src/milestone/spec-milestone';
-
-const specContent = await read('SPEC.md');
-const milestone = specMilestone.createFromSpec(specContent, budget = 100);
-
-console.log(`Created milestone ${milestone.id}`);
-console.log(`Phase: ${milestone.phase}`);
-console.log(`Tasks: ${milestone.tasks.length}`);
+### pipeline_status
+```javascript
+pipeline_status()
 ```
 
-### Step 2: Track Cost
-```typescript
-import { CostTracker } from '../../src/budget/cost-tracker';
+Returns:
+- Plan mode (tiny, normal, high-risk)
+- Task progress
+- Complexity level
+- Quality gate status
+- Active work items
 
-const tracker = new CostTracker();
-tracker.setBudget(milestone.id, 100);
-
-// Record costs as you work
-tracker.record(milestone.id, 'planning', 'Code review', 5);
-tracker.record(milestone.id, 'implementing', 'Feature implementation', 30);
-
-// Check budget
-if (tracker.isOverBudget(milestone.id)) {
-  console.warn('Over budget!');
-}
+### pipeline_verify
+```javascript
+pipeline_verify({
+  testCommand: "npm test",
+  changedFiles: ["src/file1.ts", "src/file2.ts"]
+})
 ```
 
-### Step 3: Run Quality Gates
-```typescript
-import { QualityGates } from '../../src/verify/quality-gates';
+Runs verification gates:
+- Tests
+- Type checking
+- Lint
+- Regression checks
+- Evidence completeness
 
-const gates = new QualityGates({
-  biome: true,
-  tsc: true,
-  tests: true,
-  coverage: 80
-});
+## Spec-Driven Workflow
 
-// Pre-commit (fast)
-const preCommit = await gates.run('pre-commit');
-console.log(gates.formatReport(preCommit));
+### 1. Create Spec
+```markdown
+# SPEC: Feature Name
 
-// Pre-push (thorough)
-const prePush = await gates.run('pre-push');
-if (!prePush.passed) {
-  throw new Error('Quality gates failed');
-}
+## Goal
+What we want to achieve
+
+## Acceptance Criteria
+- [ ] Criteria 1
+- [ ] Criteria 2
+
+## Verification
+How we'll verify success
 ```
 
-### Step 4: Ship with Canary
-```typescript
-import { ShipWorkflow } from '../../src/ship/ship-workflow';
-
-const ship = new ShipWorkflow();
-
-// Deploy to staging first
-const staging = await ship.ship({
-  environment: 'staging',
-  verify: { smokeTest: true }
-});
-
-// Deploy to production with canary
-const production = await ship.ship({
-  environment: 'production',
-  canary: {
-    enabled: true,
-    percentage: 10,
-    duration: 300000 // 5 minutes
-  },
-  verify: {
-    smokeTest: true,
-    healthCheck: '/health'
-  }
-});
+### 2. Track Progress
+```javascript
+pipeline_status()
+// Check current phase and progress
 ```
 
-## Milestone Phases
+### 3. Run Verification
+```javascript
+pipeline_verify({
+  testCommand: "npm test && npm run lint"
+})
+```
 
-| Phase | Description |
-|-------|-------------|
-| planning | Requirements analysis, design |
-| implementing | Code development |
-| verifying | Testing, quality checks |
-| shipping | Deployment, monitoring |
-| done | Complete |
-| blocked | Waiting on resolution |
+## Quality Gates
 
-## Quality Gate Levels
+| Gate | Purpose |
+|------|---------|
+| Tests | Unit and integration tests pass |
+| Typecheck | TypeScript types valid |
+| Lint | Code style compliant |
+| Regression | No breaking changes |
+| Evidence | Proof of completion |
 
-### Pre-commit (Fast)
-- Biome formatting check
-- TypeScript type check
-- ~10 seconds
+## Work Items
 
-### Pre-push (Thorough)
-- All pre-commit checks
-- Test suite execution
-- Coverage threshold check
-- ~2-5 minutes
-
-## Canary Deployment
-
-Monitor canary deployment for:
-- Success rate (target: >95%)
-- Latency (target: <200ms)
-- Error rate (target: <5%)
-
-Rollback automatically if metrics degrade.
+Track work through pipeline:
+- `TODO` - Work to do
+- `IN_PROGRESS` - Currently working
+- `REVIEW` - Under review
+- `DONE` - Completed
 
 ## Examples
 
-### Full Pipeline
+### Check Pipeline Status
 ```
-User: Ship this feature following the spec
+User: What's the current status?
 Agent:
-  1. Create milestone from SPEC.md
-  2. Track costs through planning
-  3. Run pre-commit gates
-  4. Implement feature
-  5. Run pre-push gates
-  6. Deploy with canary
-  7. Monitor and report
+  pipeline_status()
 ```
 
-### Budget Alert
+### Verify Before Commit
 ```
 Agent:
-  tracker.record(milestone.id, 'implementing', 'Big feature', 45);
-  
-  const alert = tracker.getAlert(milestone.id);
-  if (alert?.triggered) {
-    console.log(`⚠️ 80% budget used: ${alert.current}/${alert.limit}`);
-  }
+  pipeline_verify({
+    testCommand: "npm test",
+    changedFiles: ["src/**/*.ts"]
+  })
 ```
 
-### Queue Deployments
+### Track Milestone
 ```
+User: Are we on track for the release?
 Agent:
-  ship.queue({ environment: 'staging' });
-  ship.queue({ environment: 'production' });
-  
-  // Process in order
-  const results = await ship.processQueue();
+  1. pipeline_status()
+  2. Check milestones in SPEC.md
 ```
 
 ## Integration
 
-### With pi-recollect
-```typescript
-// Remember key decisions
-await memory.remember(
-  'Architecture choice',
-  'Microservices over monolith',
-  'decision'
-);
-
-// Add to milestone context
-const context = smartContext.query({ query: 'architecture' });
+### With pi-audit
+```javascript
+// Add security gate
+pipeline_verify({
+  testCommand: "npm test",
+  changedFiles: ["src/auth/**"]
+})
+// Include security review in gates
 ```
 
-### With pi-smart
-```typescript
-// Use smart context for decisions
-const decisions = smartContext.decisions();
-
-// Index code for fast lookup
-await codeIndex.indexProject(cwd);
+### With pi-debug
+```javascript
+// Add debug info to work items
+pipeline_status()
+// Debug stuck work items
 ```

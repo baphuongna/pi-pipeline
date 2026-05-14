@@ -22,3 +22,15 @@ export { createSpecWorkflow, type SpecDocument, type Task, type SpecWorkflow } f
 
 // Event pipeline exports
 export { createEventPipeline, type EventHandler, type EventPipeline } from './event/event-pipeline.js';
+
+// Validation ladder exports
+export {
+  ValidationLadder,
+  type LadderStage,
+  type StageResult,
+  type LadderResult,
+  type ValidationLadderConfig,
+  runValidationLadder,
+  runValidationStage,
+  LADDER_STAGES,
+} from './verify/validation-ladder.js';

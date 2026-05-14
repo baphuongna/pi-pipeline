@@ -2,7 +2,10 @@
  * SDLC Router - Workflow Path Selection
  * 
  * Pattern from vetc-dev-kit: Route to appropriate workflow path
+ * Validation ladder integration from harness-experimental Round 43 research
  */
+
+import type { LadderStage } from "../verify/validation-ladder.ts";
 
 export type SDLCPath = "a" | "b" | "c";
 
@@ -20,16 +23,38 @@ export interface PathRecommendation {
   steps: string[];
 }
 
+// Validation ladder stages per SDLC path
+const PATH_A_VALIDATION: LadderStage[] = [
+  "validate:quick",
+  "test:integration",
+  "test:e2e",
+  "test:platform",
+  "test:release",
+];
+
+const PATH_B_VALIDATION: LadderStage[] = [
+  "validate:quick",
+  "test:integration",
+];
+
+const PATH_C_VALIDATION: LadderStage[] = [
+  "validate:quick",
+  "test:integration",
+  "test:e2e",
+];
+
 const PATH_A_STEPS = [
   "BA Pipeline: Analyze requirements → Create raw specs",
   "Create data model → Design API contracts",
   "Implement with TDD → Continuous review",
-  "Verify with 6 gates → Ship",
+  "Validation ladder: validate:quick → test:integration → test:e2e → test:platform → test:release",
+  "Ship",
 ];
 
 const PATH_B_STEPS = [
   "Quick Spec: Requirements → Structured spec",
   "Direct implementation → Minimal testing",
+  "Validation ladder: validate:quick → test:integration",
   "Ship if simple",
 ];
 
@@ -37,6 +62,7 @@ const PATH_C_STEPS = [
   "Consensus Plan: Planner + Architect + Critic",
   "Agreement on approach before implementation",
   "Reduce rework from misaligned understanding",
+  "Validation ladder: validate:quick → test:integration → test:e2e",
 ];
 
 /**
@@ -107,4 +133,30 @@ export function estimateTime(path: SDLCPath, complexity: RouterContext["complexi
   };
   
   return base[path];
+}
+
+/**
+ * Get validation stages for a given SDLC path
+ */
+export function getValidationStages(path: SDLCPath): LadderStage[] {
+  switch (path) {
+    case "a": return PATH_A_VALIDATION;
+    case "b": return PATH_B_VALIDATION;
+    case "c": return PATH_C_VALIDATION;
+  }
+}
+
+/**
+ * Check if validation ladder should be used for a path
+ */
+export function requiresValidationLadder(path: SDLCPath): boolean {
+  return path === "a" || path === "c";
+}
+
+/**
+ * Get minimal validation stage for quick path
+ */
+export function getMinimalValidationStage(path: SDLCPath): LadderStage {
+  const stages = getValidationStages(path);
+  return stages[0];
 }

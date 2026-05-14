@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test, { describe } from "node:test";
-import { loadConfig, DEFAULT_CONFIG } from "../../src/config.ts";
+import { loadConfig, DEFAULT_CONFIG, deepMerge } from "../../src/config.ts";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";
@@ -92,22 +92,33 @@ describe("loadConfig", () => {
 		}
 	});
 
-	test("merges partial overrides correctly", () => {
+	test("deep-merges nested objects: only override nested field without losing siblings", () => {
 		const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pi-pipeline-test-"));
 		try {
 			fs.mkdirSync(path.join(dir, ".pi"), { recursive: true });
 			fs.writeFileSync(path.join(dir, ".pi", "pi-pipeline.json"), JSON.stringify({
-				review: { perspectives: ["security", "custom"] },
-				adaptive: { simplePipeline: ["edit"] },
+				clarification: { mode: "manual" },
 			}));
 			const { config } = loadConfig(dir);
-			assert.deepEqual(config.review.perspectives, ["security", "custom"]);
-			assert.deepEqual(config.adaptive.simplePipeline, ["edit"]);
-			// Other defaults preserved
+			// Deep merge: only mode overridden, other clarification fields preserved
+			assert.equal(config.clarification.mode, "manual");
 			assert.equal(config.clarification.enabled, true);
-			assert.equal(config.adaptive.enabled, true);
+			assert.equal(config.clarification.ambiguityThreshold, 0.5);
+			assert.equal(config.clarification.maxQuestions, 5);
+			assert.equal(config.clarification.socraticForComplex, true);
 		} finally {
 			fs.rmSync(dir, { recursive: true });
 		}
+	});
+
+	test("deepMerge utility exports and works correctly", () => {
+		const base = { a: 1, b: { c: 2, d: 3 }, e: [1, 2] };
+		const override = { b: { c: 99 }, f: 10 };
+		const result = deepMerge(base as Record<string, unknown>, override) as Record<string, unknown>;
+		assert.equal(result.a, 1);
+		assert.equal((result.b as Record<string, unknown>).c, 99);
+		assert.equal((result.b as Record<string, unknown>).d, 3); // sibling preserved
+		assert.equal(result.f, 10);
+		assert.ok(Array.isArray(result.e)); // arrays replaced, not merged
 	});
 });

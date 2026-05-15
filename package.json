@@ -44,6 +44,9 @@
     "typescript": "^5.0.0"
   },
   "scripts": {
-    "postinstall": "node install.mjs"
+    "postinstall": "node install.mjs",
+    "test": "node --experimental-strip-types --no-warnings --test",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit"
   }
 }

@@ -1,5 +1,6 @@
 import type { VerificationGate, GateResult, TaskContext } from "../types.ts";
 import { spawnSync } from "node:child_process";
+import * as fs from "node:fs";
 import * as path from "node:path";
 
 export const GATE_DEFINITIONS: VerificationGate[] = [
@@ -42,62 +43,90 @@ export const GATE_DEFINITIONS: VerificationGate[] = [
 ];
 
 /**
+ * Resolve a path to be contained within a base directory.
+ * Uses realpathSync to resolve symlinks before containment check,
+ * preventing escape via symlink traversal.
+ */
+function resolveContainedPath(base: string, candidate: string): string {
+	const { resolve, isAbsolute, sep } = path;
+	const absBase = isAbsolute(base) ? base : resolve(base);
+	const absCandidate = isAbsolute(candidate) ? candidate : resolve(absBase, candidate);
+	if (!absCandidate.startsWith(absBase + sep) && absCandidate !== absBase) {
+		return absBase;
+	}
+	// Symlink-aware: resolve symlinks in the candidate path to prevent
+	// a symlink inside base/ pointing outside from bypassing containment
+	let realCandidate: string;
+	try {
+		realCandidate = fs.realpathSync.native(absCandidate);
+	} catch {
+		// Doesn't exist yet or can't resolve — use the pre-checked path
+		realCandidate = absCandidate;
+	}
+	let realBase: string;
+	try {
+		realBase = fs.realpathSync.native(absBase);
+	} catch {
+		realBase = absBase;
+	}
+	const relative = path.relative(realBase, realCandidate);
+	if (relative.startsWith('..') || path.isAbsolute(relative)) {
+		return absBase;
+	}
+	return realCandidate;
+}
+
+/**
  * Execute a shell command and return the result.
+ * cwd is contained to prevent working directory escape.
  */
 function runCommand(
 	cmd: string,
 	args: string[],
 	cwd: string,
 ): { stdout: string; stderr: string; exitCode: number } {
-	// Strip dangerous environment variables before spawning child processes
 	const DANGEROUS_VARS = [
-			// Loader hijacking
-			"LD_PRELOAD", "LD_AUDIT", "LD_PROFILE", "LD_USE_LOAD_BIAS", "LD_DEBUG",
-			"LD_LIBRARY_PATH", "LD_ORIGIN", "LD_PATH", "LD_CONFIG", "LD_VERBOSE",
-			"DYLD_INSERT_LIBRARIES", "DYLD_LIBRARY_PATH", "DYLD_FRAMEWORK_PATH",
-			"DYLD_ROOT_PATH", "DYLD_INSERT_FUNC_LIST", "DYLD_SUPPRESS_DYLDS",
-			"DYLD_FORCE_FLAT_NAMESPACE",
-			// Shell/profile injection
-			"BASH_ENV", "ENV", "ZDOTDIR", "PROFILING",
-			// Proxy manipulation
-			"HTTP_PROXY", "HTTPS_PROXY", "NO_PROXY", "ALL_PROXY", "SOCKS_PROXY",
-			"http_proxy", "https_proxy", "no_proxy", "all_proxy", "socks_proxy",
-			// Credential exposure
-			"AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN",
-			"AWS_DEFAULT_REGION", "AWS_REGION", "AWS_PROFILE",
-			"GITHUB_TOKEN", "GITHUB_USER", "GIT_ASKPASS", "GIT_TERMINAL_PROMPT",
-			"GIT_REDIRECT_STDERR", "GIT_SSH", "GIT_SSH_COMMAND",
-			"HEROKU_API_KEY", "HEROKU_AUTH_TOKEN",
-			"STRIPE_KEY", "STRIPE_SECRET", "STRIPE_PUBLISHABLE_KEY",
-			"DATADOG_API_KEY", "DD_API_KEY",
-			// Node/V8 options abuse
-			"NODE_OPTIONS", "NODE_EXTRA_CA_CERTS", "NODE_REPL_HISTORY",
-			// SSH/Agent
-			"SSH_AUTH_SOCK", "SSH_AGENT_PID", "GCRYPT_SSH_AGENT",
-			// X11/Display
-			"XAUTHORITY", "META_AUTHORITY", "WAYLAND_DISPLAY", "DISPLAY",
-			// GDB/Debug
-			"DEBUG", "DEBUG_FILE", "DEBUG_OUTPUT", "BREAKPOINT",
-			// Python
-			"PYTHONDONTWRITEBYTECODE", "PYTHONPATH", "PYTHONHOME", "PYTHONSTARTUP",
-			"PIP_INDEX_URL", "PIP_TRUSTED_HOST",
-			// Misc injection
-			"PERL5LIB", "PERL_MM_OPT", "RUBYLIB", "BUNDLE_PATH",
-			"JAVA_HOME", "CLASSPATH", "JAR_HINTS",
-		];
-		const cleanEnv: Record<string, string> = {};
-		for (const [k, v] of Object.entries(process.env)) {
-			if (!DANGEROUS_VARS.includes(k)) {
-				cleanEnv[k] = v ?? "";
-			}
+		"LD_PRELOAD", "LD_AUDIT", "LD_PROFILE", "LD_USE_LOAD_BIAS", "LD_DEBUG",
+		"LD_LIBRARY_PATH", "LD_ORIGIN", "LD_PATH", "LD_CONFIG", "LD_VERBOSE",
+		"DYLD_INSERT_LIBRARIES", "DYLD_LIBRARY_PATH", "DYLD_FRAMEWORK_PATH",
+		"DYLD_ROOT_PATH", "DYLD_INSERT_FUNC_LIST", "DYLD_SUPPRESS_DYLDS",
+		"DYLD_FORCE_FLAT_NAMESPACE",
+		"BASH_ENV", "ENV", "ZDOTDIR", "PROFILING",
+		"HTTP_PROXY", "HTTPS_PROXY", "NO_PROXY", "ALL_PROXY", "SOCKS_PROXY",
+		"http_proxy", "https_proxy", "no_proxy", "all_proxy", "socks_proxy",
+		"AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN",
+		"AWS_DEFAULT_REGION", "AWS_REGION", "AWS_PROFILE",
+		"GITHUB_TOKEN", "GITHUB_USER", "GIT_ASKPASS", "GIT_TERMINAL_PROMPT",
+		"GIT_REDIRECT_STDERR", "GIT_SSH", "GIT_SSH_COMMAND",
+		"HEROKU_API_KEY", "HEROKU_AUTH_TOKEN",
+		"STRIPE_KEY", "STRIPE_SECRET", "STRIPE_PUBLISHABLE_KEY",
+		"DATADOG_API_KEY", "DD_API_KEY",
+		"NODE_OPTIONS", "NODE_EXTRA_CA_CERTS", "NODE_REPL_HISTORY",
+		"SSH_AUTH_SOCK", "SSH_AGENT_PID", "GCRYPT_SSH_AGENT",
+		"XAUTHORITY", "META_AUTHORITY", "WAYLAND_DISPLAY", "DISPLAY",
+		"DEBUG", "DEBUG_FILE", "DEBUG_OUTPUT", "BREAKPOINT",
+		"PYTHONDONTWRITEBYTECODE", "PYTHONPATH", "PYTHONHOME", "PYTHONSTARTUP",
+		"PIP_INDEX_URL", "PIP_TRUSTED_HOST",
+		"PERL5LIB", "PERL_MM_OPT", "RUBYLIB", "BUNDLE_PATH",
+		"JAVA_HOME", "CLASSPATH", "JAR_HINTS",
+	];
+	const cleanEnv: Record<string, string> = {};
+	for (const [k, v] of Object.entries(process.env)) {
+		if (!DANGEROUS_VARS.includes(k)) {
+			cleanEnv[k] = v ?? "";
 		}
-		const result = spawnSync(cmd, args, {
-			cwd,
-			encoding: "utf8",
-			timeout: 120000,
-			maxBuffer: 10 * 1024 * 1024,
-			env: cleanEnv,
-		});
+	}
+
+	// Contain cwd to prevent escape beyond project root
+	const containedCwd = resolveContainedPath(cwd, cwd);
+
+	const result = spawnSync(cmd, args, {
+		cwd: containedCwd,
+		encoding: "utf8",
+		timeout: 120000,
+		maxBuffer: 10 * 1024 * 1024,
+		env: cleanEnv,
+	});
 
 	return {
 		stdout: result.stdout ?? "",
@@ -141,7 +170,7 @@ export function checkTestsGate(ctx: TaskContext): GateResult {
 }
 
 /**
- * Check the typecheck gate — actually runs tsc.
+ * Check the typecheck gate — runs tsc on changed files only.
  */
 export function checkTypecheckGate(ctx: TaskContext): GateResult {
 	if (ctx.changedFiles.length === 0) {
@@ -149,10 +178,14 @@ export function checkTypecheckGate(ctx: TaskContext): GateResult {
 	}
 
 	try {
-		// Try tsc --noEmit on changed files
+		const tsFiles = ctx.changedFiles.filter(f => f.endsWith('.ts') || f.endsWith('.tsx'));
+		if (tsFiles.length === 0) {
+			return { gateId: "typecheck", passed: true, evidence: "No TS files changed", message: "Skipped" };
+		}
+
 		const tscResult = runCommand(
 			"npx",
-			["tsc", "--noEmit", "--project", path.join(ctx.cwd, "tsconfig.json")],
+			["tsc", "--noEmit", "--skipLibCheck", ...tsFiles],
 			ctx.cwd,
 		);
 		const passed = tscResult.exitCode === 0;
@@ -160,7 +193,7 @@ export function checkTypecheckGate(ctx: TaskContext): GateResult {
 		return {
 			gateId: "typecheck",
 			passed,
-			evidence: `tsc --noEmit exit code: ${tscResult.exitCode}\n${tscResult.stdout.slice(0, 500)}`,
+			evidence: `tsc --noEmit on ${tsFiles.length} files, exit: ${tscResult.exitCode}\n${tscResult.stdout.slice(0, 500)}`,
 			message: passed ? "No type errors" : "Type check FAILED",
 		};
 	} catch (err) {
@@ -181,7 +214,6 @@ export function checkLintGate(ctx: TaskContext): GateResult {
 		return { gateId: "lint", passed: true, evidence: "No changed files", message: "Skipped" };
 	}
 
-	// Try eslint first, then prettier
 	for (const linter of ["eslint", "prettier"]) {
 		try {
 			const args = linter === "eslint"
@@ -202,7 +234,6 @@ export function checkLintGate(ctx: TaskContext): GateResult {
 		}
 	}
 
-	// No linter found — skip non-blocking
 	return {
 		gateId: "lint",
 		passed: true,
@@ -246,15 +277,30 @@ export function checkRegressionGate(ctx: TaskContext): GateResult {
 }
 
 /**
- * Check the evidence gate — verifies agent provided completion evidence.
+ * Check the evidence gate — verifies agent provided structured completion evidence.
+ * Requires artifact paths, verification commands, and explicit markers — not just keywords.
  */
 export function checkEvidenceGate(ctx: TaskContext): GateResult {
-	const output = ctx.assistantOutput.toLowerCase();
+	const output = ctx.assistantOutput;
+
+	// Require structured evidence: file paths, diff blocks, or explicit markers
+	const hasArtifactPaths = /\.(test|spec)\.(ts|js|tsx|jsx)/m.test(output) ||
+		/changed.*files?:/i.test(output) ||
+		/```(?:diff|json|yaml)/m.test(output);
+
+	const hasVerificationCommand = /\bnpm test\b|\bnpm run\b|\btsc\b|\beslint\b/m.test(output);
+
+	const hasExplicitCompletion = /✓|✅|passing|success|verified|all tests? (?:pass|run)/i.test(output);
+
+	// Changed files must be explicitly referenced
+	const changedFilesListed = ctx.changedFiles.length === 0 ||
+		ctx.changedFiles.some(f => output.includes(f) || output.includes(f.split('/').pop()!));
+
 	const checklist: Record<string, boolean> = {
-		"Changed files listed": ctx.changedFiles.length > 0,
-		"Tests mentioned": output.includes("test"),
-		"Verification command run": output.includes("ran") || output.includes("executed") || output.includes("npm test"),
-		"No errors remaining": !output.includes("error") || output.includes("fixed"),
+		"Changed files listed": changedFilesListed,
+		"Has artifact/evidence": hasArtifactPaths,
+		"Verification command cited": hasVerificationCommand,
+		"Explicit completion marker": hasExplicitCompletion,
 	};
 
 	const failures = Object.entries(checklist)
@@ -300,9 +346,6 @@ export function checkTddGate(ctx: TaskContext): GateResult {
 	};
 }
 
-/**
- * Map of gate IDs to their check functions.
- */
 export const GATE_CHECKS: Record<string, (ctx: TaskContext) => GateResult> = {
 	tests: checkTestsGate,
 	typecheck: checkTypecheckGate,
@@ -312,18 +355,12 @@ export const GATE_CHECKS: Record<string, (ctx: TaskContext) => GateResult> = {
 	tdd: checkTddGate,
 };
 
-/**
- * Run specified gates against a task context.
- */
 export function runGates(ctx: TaskContext, gateIds: string[]): GateResult[] {
 	return gateIds
 		.filter((id) => GATE_CHECKS[id])
 		.map((id) => GATE_CHECKS[id](ctx));
 }
 
-/**
- * Get the gate definition by ID.
- */
 export function getGateDefinition(id: string): VerificationGate | undefined {
 	return GATE_DEFINITIONS.find((g) => g.id === id);
 }

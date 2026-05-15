@@ -3,6 +3,8 @@
  * Based on gsd-2 headless mode and spec-driven development patterns
  */
 
+
+import { randomUUID } from 'node:crypto';
 export interface Spec {
   title: string;
   problem?: string;
@@ -53,7 +55,7 @@ export interface MilestoneResult {
 }
 
 function generateId(): string {
-  return `ms-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+  return `ms-${randomUUID()}`;
 }
 
 /**
@@ -257,7 +259,8 @@ export class SpecMilestone {
    */
   updateTask(milestoneId: string, taskId: string, status: MilestoneTask['status']): void {
     const milestone = this.milestones.get(milestoneId);
-    const task = milestone?.tasks.find((t) => t.id === taskId);
+    if (!milestone) return;
+    const task = milestone.tasks.find((t) => t.id === taskId);
     if (task) {
       task.status = status;
       milestone.updatedAt = Date.now();

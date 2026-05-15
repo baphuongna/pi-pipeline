@@ -10,7 +10,7 @@ import {
   getPathDescription,
   requiresAdditionalSteps,
   estimateTime,
-} from '../../src/router/sdlc-router.js';
+} from '../../src/router/sdlc-router.ts';
 
 describe('SDLCRouter', () => {
   describe('routeSDLC', () => {

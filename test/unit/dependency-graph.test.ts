@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
-import { createDependencyGraph } from '../../src/graph/dependency-graph.js';
+import { createDependencyGraph } from '../../src/graph/dependency-graph.ts';
 
 describe('Dependency Graph', () => {
   it('finds blocked tasks', () => {

@@ -30,7 +30,6 @@ export function createEventPipeline(): EventPipeline & {
      * Emit event to all handlers
      */
     emit<T>(event: string, data: T): void {
-      // Regular handlers
       const eventHandlers = handlers.get(event);
       if (eventHandlers) {
         for (const handler of eventHandlers) {
@@ -45,7 +44,6 @@ export function createEventPipeline(): EventPipeline & {
         }
       }
       
-      // Once handlers
       const once = onceHandlers.get(event);
       if (once) {
         for (const handler of once) {
@@ -67,8 +65,6 @@ export function createEventPipeline(): EventPipeline & {
         handlers.set(event, new Set());
       }
       handlers.get(event)!.add(handler as EventHandler);
-      
-      // Return unsubscribe function
       return () => {
         handlers.get(event)?.delete(handler as EventHandler);
       };
@@ -82,7 +78,6 @@ export function createEventPipeline(): EventPipeline & {
         onceHandlers.set(event, new Set());
       }
       onceHandlers.get(event)!.add(handler as EventHandler);
-      
       return () => {
         onceHandlers.get(event)?.delete(handler as EventHandler);
       };
@@ -102,7 +97,12 @@ export function createEventPipeline(): EventPipeline & {
     },
     
     /**
-     * Create pipeline of handlers
+     * Create pipeline of handlers.
+     * The last step is treated as a sink (no next handler wired to it).
+     * The loop runs up to steps.length - 1, so the final step receives
+     * data but does not forward it further — intentional for sink handlers.
+     * If the last step needs to pass data forward, add explicit wiring after
+     * the loop or register an additional handler.
      */
     pipeline(event: string, steps: EventHandler[]): void {
       for (let i = 0; i < steps.length - 1; i++) {

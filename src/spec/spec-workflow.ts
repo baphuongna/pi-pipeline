@@ -5,6 +5,8 @@
  * Ported from spec-kit.git
  */
 
+
+import { randomUUID } from 'node:crypto';
 export interface SpecDocument {
   feature: string;
   overview: string;
@@ -42,7 +44,7 @@ export function createSpecWorkflow() {
   };
   
   function generateId(): string {
-    return `T-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 5)}`;
+    return `T-${randomUUID()}`;
   }
   
   return {

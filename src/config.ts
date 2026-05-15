@@ -130,7 +130,7 @@ export function loadConfig(cwd: string): { config: PipelineExtensionConfig; sour
 		const config = deepMerge(
 			structuredClone(DEFAULT_CONFIG) as unknown as Record<string, unknown>,
 			parsed as Record<string, unknown>,
-		) as PipelineExtensionConfig;
+		) as unknown as PipelineExtensionConfig;
 
 		return { config, source: "file" };
 	} catch {

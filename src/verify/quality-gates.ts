@@ -3,10 +3,45 @@
  * Based on everything-claude-code quality gate patterns
  */
 
-import { exec } from 'node:child_process';
+import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
+
+/**
+ * Parse a shell command string into [cmd, ...args].
+ * Handles double-quoted and single-quoted args, but not nested quotes or escape sequences.
+ */
+function parseShellArgs(cmd: string): [string, ...string[]] {
+  const args: string[] = [];
+  let current = '';
+  let inDouble = false;
+  let inSingle = false;
+  let i = 0;
+
+  while (i < cmd.length) {
+    const ch = cmd[i];
+    if (inSingle) {
+      if (ch === "'") { inSingle = false; }
+      else { current += ch; }
+    } else if (inDouble) {
+      if (ch === '"') { inDouble = false; }
+      else if (ch === '\\' && i + 1 < cmd.length) { current += cmd[++i]; }
+      else { current += ch; }
+    } else {
+      if (ch === '"') { inDouble = true; }
+      else if (ch === "'") { inSingle = true; }
+      else if (ch === ' ' || ch === '\t') {
+        if (current) { args.push(current); current = ''; }
+      } else { current += ch; }
+    }
+    i++;
+  }
+  if (current) { args.push(current); }
+
+  if (args.length === 0) { return [cmd, '--']; }
+  return [args[0], ...args.slice(1)] as [string, ...string[]];
+}
 
 export interface GateResult {
   name: string;
@@ -90,7 +125,8 @@ export class QualityGates {
     const start = Date.now();
 
     try {
-      const { stdout } = await execAsync('npx biome check --error-on-warnings .', {
+      const [cmd, ...args] = parseShellArgs('npx biome check --error-on-warnings .');
+      const { stdout } = await execFileAsync(cmd, args, {
         timeout: 60000,
       });
 
@@ -141,7 +177,8 @@ export class QualityGates {
     const start = Date.now();
 
     try {
-      const { stdout, stderr } = await execAsync('npx tsc --noEmit', {
+      const [cmd, ...args] = parseShellArgs('npx tsc --noEmit');
+      const { stdout, stderr } = await execFileAsync(cmd, args, {
         timeout: 120000,
       });
 
@@ -192,7 +229,8 @@ export class QualityGates {
     const start = Date.now();
 
     try {
-      const { stdout } = await execAsync('npm test 2>&1', {
+      const [cmd, ...args] = parseShellArgs('npm test');
+      const { stdout } = await execFileAsync(cmd, args, {
         timeout: 300000,
       });
 
@@ -227,7 +265,8 @@ export class QualityGates {
     const start = Date.now();
 
     try {
-      const { stdout } = await execAsync('npm run test:coverage 2>&1', {
+      const [cmd, ...args] = parseShellArgs('npm run test:coverage');
+      const { stdout, stderr } = await execFileAsync(cmd, args, {
         timeout: 300000,
       });
 
@@ -259,7 +298,8 @@ export class QualityGates {
     const start = Date.now();
 
     try {
-      const { stdout, stderr } = await execAsync(command, {
+      const [cmd, ...args] = parseShellArgs(command);
+      const { stdout, stderr } = await execFileAsync(cmd, args, {
         timeout: 120000,
       });
 

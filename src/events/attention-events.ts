@@ -4,6 +4,8 @@
  * Deduplicated attention event tracking for pipeline stages.
  */
 
+
+import { randomUUID } from 'node:crypto';
 export type AttentionReason = 
   | "no_verification"
   | "threshold_exceeded"
@@ -62,7 +64,7 @@ export class AttentionEventTracker {
     if (duplicate) return false;
     
     const event: AttentionEvent = {
-      id: `attention-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      id: `attention-${randomUUID()}`,
       type: "attention",
       timestamp: new Date().toISOString(),
       stageId,

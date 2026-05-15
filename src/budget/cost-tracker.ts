@@ -1,8 +1,15 @@
 /**
  * Cost Tracker - Track resource usage per milestone
  * Based on gsd-2 cost tracking patterns
+ * 
+ * NOTE: This CostTracker is exported for advanced use but not auto-wired.
+ * To use: import { randomUUID } from 'node:crypto';
+import and instantiate in your pipeline, then call track() on milestones.
+ * See Bug #15 in EXTENSION_UPGRADE_PLAN.md
  */
 
+
+import { randomUUID } from 'node:crypto';
 export interface CostEntry {
   id: string;
   milestoneId: string;
@@ -71,7 +78,7 @@ export class CostTracker {
     metadata?: Record<string, unknown>
   ): CostEntry {
     const entry: CostEntry = {
-      id: `cost-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      id: `cost-${randomUUID()}`,
       milestoneId,
       phase,
       action,

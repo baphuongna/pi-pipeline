@@ -94,7 +94,11 @@ describe("checkRegressionGate", () => {
 
 describe("checkEvidenceGate", () => {
 	test("passes when evidence is complete", () => {
-		const result = checkEvidenceGate(baseCtx);
+		const completeCtx = {
+			...baseCtx,
+			assistantOutput: "I ran npm test on test/main.test.ts — all tests pass. Changed files: test/main.test.ts\n```diff\n+ it('works', () => { expect(true).toBe(true); });\n```\n✅ All 1 test passing.",
+		};
+		const result = checkEvidenceGate(completeCtx);
 		assert.equal(result.passed, true);
 		assert.ok(result.message.includes("All evidence"));
 	});

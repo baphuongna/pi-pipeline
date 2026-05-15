@@ -4,6 +4,8 @@
  * Links agent sessions to project work items (issues, tasks, PRs).
  */
 
+
+import { randomUUID } from 'node:crypto';
 export interface WorkItem {
   id: string;
   type: 'issue' | 'task' | 'pr';
@@ -36,7 +38,7 @@ export function createWorkItemTracker() {
   const sessionIndex = new Map<string, Set<string>>(); // sessionId -> Set<itemId>
   
   function generateId(): string {
-    return `WI-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+    return `WI-${randomUUID()}`;
   }
   
   return {

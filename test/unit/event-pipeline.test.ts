@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
-import { createEventPipeline } from '../../src/event/event-pipeline.js';
+import { createEventPipeline } from '../../src/event/event-pipeline.ts';
 
 describe('Event Pipeline', () => {
   it('emits to handlers', () => {

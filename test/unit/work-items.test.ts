@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
-import { createWorkItemTracker } from '../../src/track/work-items.js';
+import { createWorkItemTracker } from '../../src/track/work-items.ts';
 
 describe('Work Item Tracker', () => {
   it('creates work items', () => {

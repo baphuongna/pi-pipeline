@@ -1,5 +1,5 @@
-import type { ExtensionAPI, ToolDefinition } from "@mariozechner/pi-coding-agent";
-import { Type } from "typebox";
+import type { ExtensionAPI, ToolDefinition } from "@earendil-works/pi-coding-agent";
+import { Type } from "@sinclair/typebox";
 
 interface PipelineToolResult {
 	content: Array<{ type: "text"; text: string }>;

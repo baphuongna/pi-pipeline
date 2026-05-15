@@ -7,10 +7,45 @@
  * Applied from Round 43 HIGH priority research findings.
  */
 
-import { exec } from "node:child_process";
+import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
+
+/**
+ * Parse a shell command string into [cmd, ...args].
+ * Handles double-quoted and single-quoted args.
+ */
+function parseShellArgs(cmd: string): [string, ...string[]] {
+  const args: string[] = [];
+  let current = '';
+  let inDouble = false;
+  let inSingle = false;
+  let i = 0;
+
+  while (i < cmd.length) {
+    const ch = cmd[i];
+    if (inSingle) {
+      if (ch === "'") { inSingle = false; }
+      else { current += ch; }
+    } else if (inDouble) {
+      if (ch === '"') { inDouble = false; }
+      else if (ch === '\\' && i + 1 < cmd.length) { current += cmd[++i]; }
+      else { current += ch; }
+    } else {
+      if (ch === '"') { inDouble = true; }
+      else if (ch === "'") { inSingle = true; }
+      else if (ch === ' ' || ch === '\t') {
+        if (current) { args.push(current); current = ''; }
+      } else { current += ch; }
+    }
+    i++;
+  }
+  if (current) { args.push(current); }
+
+  if (args.length === 0) { return [cmd, '--']; }
+  return [args[0], ...args.slice(1)] as [string, ...string[]];
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -180,7 +215,8 @@ export class ValidationLadder {
     timedOut: boolean;
   }> {
     try {
-      const { stdout, stderr } = await execAsync(cmd, {
+      const [file, ...args] = parseShellArgs(cmd);
+      const { stdout, stderr } = await execFileAsync(file, args, {
         cwd: this.config.cwd,
         timeout,
         killSignal: "SIGKILL",

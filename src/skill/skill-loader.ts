@@ -8,7 +8,7 @@
  */
 
 import type { Dirent } from "node:fs";
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, lstatSync, readdirSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
@@ -24,8 +24,7 @@ export function isUnsafeName(name: string): boolean {
  */
 export function isSymlink(path: string): boolean {
   try {
-    const stats = readFileSync(path, "utf8");
-    return false;
+    return lstatSync(path).isSymbolicLink();
   } catch {
     return false;
   }

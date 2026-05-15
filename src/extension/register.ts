@@ -1,4 +1,4 @@
-import type { ExtensionAPI, ExtensionContext, ExtensionCommandContext } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext, ExtensionCommandContext } from "@earendil-works/pi-coding-agent";
 import { loadConfig } from "../config.ts";
 import { registerPipelineTools } from "./tool-registry.ts";
 import { emptyPipelineState } from "../types.ts";
@@ -121,7 +121,8 @@ function registerPipelineCommands(
 			} else if (arg === "review") {
 				const { createSpecComplianceReview, createCodeQualityReview } = await import("../review/two-stage.ts");
 				const stage1 = createSpecComplianceReview();
-				const result = handlePlanReview(state(), stage1);
+				const stage2 = createCodeQualityReview();
+				const result = handlePlanReview(state(), stage1, stage2);
 				set(result.state);
 				cmdCtx.ui.notify(result.message);
 			} else {

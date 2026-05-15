@@ -1,6 +1,6 @@
 {
   "name": "pi-pipeline",
-  "version": "0.4.19",
+  "version": "0.4.20",
   "description": "Extension for Pi coding agent",
   "type": "module",
   "main": "./index.ts",
@@ -36,12 +36,12 @@
   "license": "MIT",
   "repository": "https://github.com/baphuongna/pi-pipeline",
   "dependencies": {
-    "croner": "^9.0.0",
-    "typebox": "^1.1.0"
+    "@sinclair/typebox": "^0.34.49",
+    "croner": "^9.0.0"
   },
   "peerDependencies": {
-    "typescript": "^5.0.0",
-    "@earendil-works/pi-coding-agent": ">=0.73.0"
+    "@earendil-works/pi-coding-agent": ">=0.73.0",
+    "typescript": "^5.0.0"
   },
   "scripts": {
     "postinstall": "node install.mjs"

@@ -4,6 +4,7 @@
  * Supports cron expressions, intervals, and one-shot scheduling.
  */
 
+import { randomUUID } from 'node:crypto';
 import type { Cron } from 'croner';
 
 export type ScheduleType = 'cron' | 'once' | 'interval';
@@ -185,7 +186,7 @@ export class PipelineScheduler {
   }
 
   private generateId(): string {
-    return `job-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+    return `job-${randomUUID()}`;
   }
 
   /**

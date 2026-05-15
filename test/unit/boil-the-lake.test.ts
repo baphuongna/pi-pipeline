@@ -10,7 +10,7 @@ import {
   COMPRESSION_RATIOS,
   formatCompressionRatio,
   searchBeforeBuildingCheck,
-} from '../../src/ethos/boil-the-lake.js';
+} from '../../src/ethos/boil-the-lake.ts';
 
 describe('BoilTheLake', () => {
   describe('shouldComplete', () => {

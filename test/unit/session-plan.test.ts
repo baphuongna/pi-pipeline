@@ -1,6 +1,6 @@
 import { describe, it, beforeEach } from 'node:test';
 import assert from 'node:assert';
-import { createSessionPlanner } from '../../src/plan/session-plan.js';
+import { createSessionPlanner } from '../../src/plan/session-plan.ts';
 
 describe('Session Planner', () => {
   const planner = createSessionPlanner();

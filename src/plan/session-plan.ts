@@ -5,6 +5,8 @@
  * Ported from pi-extensions.git pi-blueprint
  */
 
+
+import { randomUUID } from 'node:crypto';
 export interface Milestone {
   id: string;
   title: string;
@@ -35,7 +37,7 @@ export function createSessionPlanner() {
   const plans = new Map<string, SessionPlan>();
   
   function generateId(): string {
-    return `PLAN-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 5)}`;
+    return `PLAN-${randomUUID()}`;
   }
   
   function calculateProgress(plan: SessionPlan): number {

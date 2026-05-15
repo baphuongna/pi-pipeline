@@ -9,7 +9,7 @@ import {
   createDecisionRegistry,
   createADR,
   formatDecisionAsMarkdown,
-} from '../../src/decisions/adr.js';
+} from '../../src/decisions/adr.ts';
 
 describe('ADR', () => {
   describe('createDecisionRegistry', () => {

@@ -6,7 +6,7 @@
  * Inspired by pi-crew's retry-executor.ts.
  */
 
-import { sleep } from "./sleep.ts";
+import { sleep, sleepWithAbort } from "./sleep.ts";
 
 /**
  * Retry policy configuration.
@@ -94,7 +94,7 @@ export function calculateRetryDelay(
   random = Math.random
 ): number {
   const base = policy.backoffMs * Math.pow(policy.exponentialFactor, Math.max(0, attempt - 1));
-  const jitter = (random * 2 - 1) * policy.jitterRatio * base;
+  const jitter = (random() * 2 - 1) * policy.jitterRatio * base;
   return Math.max(0, base + jitter);
 }
 
@@ -149,7 +149,7 @@ export async function withRetry<T>(
       hooks.onAttemptFailed?.(attempt, lastError, delayMs, info);
 
       // Wait before next attempt
-      await sleep(delayMs, hooks.signal);
+      await sleepWithAbort(delayMs, hooks.signal);
     }
   }
 

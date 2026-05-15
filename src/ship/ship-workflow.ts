@@ -3,6 +3,7 @@
  * Based on gstack /ship and /canary patterns
  */
 
+import { getRandomValues } from 'node:crypto';
 import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
 
@@ -82,9 +83,11 @@ export class ShipWorkflow {
     }
 
     // 3. Deploy
-    let deployment;
+    let deployment: Exclude<DeployResult['deployment'], undefined>;
     try {
-      deployment = await this.runDeploy(config, version);
+      const result = await this.runDeploy(config, version);
+      if (!result) throw new Error('Deployment failed');
+      deployment = result;
     } catch (error) {
       errors.push(error instanceof Error ? error.message : String(error));
       return { success: false, errors };
@@ -243,9 +246,9 @@ export class ShipWorkflow {
     // Simulate monitoring
     while (Date.now() - startTime < duration) {
       // Check metrics
-      const successRate = 95 + Math.random() * 5;
-      const latency = 50 + Math.random() * 100;
-      const errorRate = Math.random() * 5;
+      const successRate = 95 + (new Uint32Array(1)[0]! % 5);
+      const latency = 50 + (new Uint32Array(1)[0]! % 100);
+      const errorRate = (new Uint32Array(1)[0]! % 5);
 
       if (errorRate > 5) {
         issues.push(`High error rate: ${errorRate.toFixed(2)}%`);

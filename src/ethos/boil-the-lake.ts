@@ -93,9 +93,11 @@ export function formatCompressionRatio(
     return `~${Math.round(ratio)}x compression (${formatDuration(actualHumanHours, actualAiMinutes)})`;
   }
   
-  const humanStr = base.aiHours !== undefined 
-    ? formatDuration(base.humanHours, base.aiHours)
-    : formatDuration(base.humanHours, base.aiMinutes);
+  const aiHrs = (base as { aiHours?: number }).aiHours;
+  const aiMins = (base as { aiMinutes?: number }).aiMinutes;
+  const humanStr = aiHrs !== undefined
+    ? formatDuration(base.humanHours, aiHrs)
+    : formatDuration(base.humanHours, aiMins ?? 15);
   
   return `~${base.ratio}x compression (${humanStr})`;
 }

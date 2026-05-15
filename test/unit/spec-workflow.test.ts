@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
-import { createSpecWorkflow } from '../../src/spec/spec-workflow.js';
+import { createSpecWorkflow } from '../../src/spec/spec-workflow.ts';
 
 describe('Spec Workflow', () => {
   const workflow = createSpecWorkflow();

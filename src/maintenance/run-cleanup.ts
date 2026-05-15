@@ -43,7 +43,7 @@ export function pruneRuns(
   
   // Sort by updatedAt descending
   const sorted = [...runs].sort((a, b) => 
-    b.updatedAt.localeCompare(a.updatedAt)
+    b.updatedAt.localeCompare(a.updatedAt) || a.runId.localeCompare(b.runId)
   );
   
   // Split into keep and remove

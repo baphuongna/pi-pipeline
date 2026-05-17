@@ -1,4 +1,5 @@
 import type { ExtensionAPI, ExtensionContext, ExtensionCommandContext } from "@earendil-works/pi-coding-agent";
+import { visual_update_plan } from "@earendil-works/pi-coding-agent";
 import { loadConfig } from "../config.ts";
 import { registerPipelineTools } from "./tool-registry.ts";
 import { emptyPipelineState } from "../types.ts";
@@ -6,6 +7,22 @@ import { detectAmbiguity } from "../clarify/ambiguity.ts";
 import { totalAmbiguityScore } from "../clarify/scoring.ts";
 import { detectComplexity } from "../adaptive/complexity.ts";
 import { handlePlan, handlePlanDeepen, handlePlanGo, handlePlanStatus } from "../commands/plan.ts";
+
+// Helper to update plan visual
+async function updatePlanVisual(title: string, status: string, tasks: Array<{ id: string; description: string; files: string[]; status: string }>) {
+  try {
+    await visual_update_plan({
+      title,
+      status: status as "DRAFT" | "READY" | "APPROVED" | "REJECTED",
+      tasks: tasks.map((t) => ({
+        id: t.id,
+        description: t.description,
+        files: t.files,
+        status: t.status as "pending" | "in-progress" | "done",
+      })),
+    });
+  } catch { /* ignore if visual not available */ }
+}
 import { handlePlanReview } from "../commands/review.ts";
 import { handleVerify, handleVerifyEvidence } from "../commands/verify.ts";
 import { handleClarify } from "../commands/clarify.ts";
